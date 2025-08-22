@@ -68,7 +68,7 @@ def authorize_arduino(request):
     if not token:
         return Response({'error': 'Missing token'}, status=status.HTTP_400_BAD_REQUEST)
 
-    device = ArduinoDevice.objects.filter(token=token, is_active=True).first()
+    device = ArduinoDevice.objects.filter(token=token, is_active=True, user__isnull=False).first()
     if not device:
         return Response({'error': 'Invalid or inactive device'}, status=status.HTTP_401_UNAUTHORIZED)
 
