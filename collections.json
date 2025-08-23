@@ -1,0 +1,571 @@
+{
+  "info": {
+    "name": "Arduino Security System API",
+    "description": "Complete API collection for Arduino Security System with authentication, device management, and sensor data endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "device_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "device_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alert_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    console.log('User registered successfully');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"full_name\": \"Test User\",\n  \"phone_number\": \"+998901234567\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/register/",
+              "host": ["{{base_url}}"],
+              "path": ["register", ""]
+            },
+            "description": "Register a new user in the system"
+          },
+          "response": []
+        },
+        {
+          "name": "Login (Get Tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', responseJson.access);",
+                  "    pm.collectionVariables.set('refresh_token', responseJson.refresh);",
+                  "    console.log('Tokens saved successfully');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/token/",
+              "host": ["{{base_url}}"],
+              "path": ["token", ""]
+            },
+            "description": "Authenticate user and get JWT tokens"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', responseJson.access);",
+                  "    console.log('Access token refreshed');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/token/refresh/",
+              "host": ["{{base_url}}"],
+              "path": ["token", "refresh", ""]
+            },
+            "description": "Refresh access token using refresh token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔌 Arduino Device Management",
+      "item": [
+        {
+          "name": "Create New Arduino Device",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.collectionVariables.set('device_token', responseJson.token);",
+                  "    console.log('Device token saved:', responseJson.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/arduino/create/",
+              "host": ["{{base_url}}"],
+              "path": ["arduino", "create", ""]
+            },
+            "description": "Create a new Arduino device and get its token"
+          },
+          "response": []
+        },
+        {
+          "name": "List User's Arduino Devices",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const devices = pm.response.json();",
+                  "    if (devices.length > 0) {",
+                  "        pm.collectionVariables.set('device_id', devices[0].id);",
+                  "        console.log('First device ID saved:', devices[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/arduino/list/",
+              "host": ["{{base_url}}"],
+              "path": ["arduino", "list", ""]
+            },
+            "description": "Get list of user's Arduino devices"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Arduino Device",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Home Security System\",\n  \"address\": \"123 Main Street, Tashkent\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/arduino/{{device_id}}/update/",
+              "host": ["{{base_url}}"],
+              "path": ["arduino", "{{device_id}}", "update", ""]
+            },
+            "description": "Update Arduino device information"
+          },
+          "response": []
+        },
+        {
+          "name": "Arduino Authorization Check",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{device_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/arduino/auth/",
+              "host": ["{{base_url}}"],
+              "path": ["arduino", "auth", ""]
+            },
+            "description": "Check if Arduino device token is valid and authorized"
+          },
+          "response": []
+        },
+        {
+          "name": "Claim Arduino Device",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"1234567890abcdef\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/arduino/claim/",
+              "host": ["{{base_url}}"],
+              "path": ["arduino", "claim", ""]
+            },
+            "description": "Claim an unclaimed Arduino device using its token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Sensor Data & Alerts",
+      "item": [
+        {
+          "name": "Send Sensor Data (Arduino)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{device_token}}\",\n  \"pir_motion\": true,\n  \"glass_break\": false,\n  \"door_open\": false,\n  \"panic_button\": false,\n  \"temperature\": 23.5,\n  \"humidity\": 65.2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/data/",
+              "host": ["{{base_url}}"],
+              "path": ["sensor", "data", ""]
+            },
+            "description": "Send sensor data from Arduino device (triggers alerts if needed)"
+          },
+          "response": []
+        },
+        {
+          "name": "Send Panic Button Alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{device_token}}\",\n  \"pir_motion\": false,\n  \"glass_break\": false,\n  \"door_open\": false,\n  \"panic_button\": true,\n  \"temperature\": 24.1,\n  \"humidity\": 63.8\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/data/",
+              "host": ["{{base_url}}"],
+              "path": ["sensor", "data", ""]
+            },
+            "description": "Simulate panic button press"
+          },
+          "response": []
+        },
+        {
+          "name": "Send Glass Break Alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{device_token}}\",\n  \"pir_motion\": false,\n  \"glass_break\": true,\n  \"door_open\": false,\n  \"panic_button\": false,\n  \"temperature\": 22.8,\n  \"humidity\": 67.1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/data/",
+              "host": ["{{base_url}}"],
+              "path": ["sensor", "data", ""]
+            },
+            "description": "Simulate glass break detection"
+          },
+          "response": []
+        },
+        {
+          "name": "Send Door Open Alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{device_token}}\",\n  \"pir_motion\": false,\n  \"glass_break\": false,\n  \"door_open\": true,\n  \"panic_button\": false,\n  \"temperature\": 23.2,\n  \"humidity\": 64.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/data/",
+              "host": ["{{base_url}}"],
+              "path": ["sensor", "data", ""]
+            },
+            "description": "Simulate door opening"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Alerts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const alerts = pm.response.json();",
+                  "    if (alerts.length > 0) {",
+                  "        pm.collectionVariables.set('alert_id', alerts[0].id);",
+                  "        console.log('First alert ID saved:', alerts[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sensor/alerts/",
+              "host": ["{{base_url}}"],
+              "path": ["sensor", "alerts", ""]
+            },
+            "description": "Get list of user's security alerts"
+          },
+          "response": []
+        },
+        {
+          "name": "Acknowledge Alert",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/alerts/{{alert_id}}/acknowledge/",
+              "host": ["{{base_url}}"],
+              "path": ["sensor", "alerts", "{{alert_id}}", "acknowledge", ""]
+            },
+            "description": "Mark an alert as acknowledged"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🧪 Test Scenarios",
+      "item": [
+        {
+          "name": "Complete Workflow Test",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": ["{{base_url}}"],
+              "path": [""]
+            },
+            "description": "This is a placeholder for running complete workflow tests"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-refresh token if needed",
+          "if (pm.request.url.toString().includes('/token/') === false) {",
+          "    const accessToken = pm.collectionVariables.get('access_token');",
+          "    if (!accessToken) {",
+          "        console.log('No access token found. Please login first.');",
+          "    }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global response logging",
+          "if (pm.response.code >= 400) {",
+          "    console.log('Error Response:', pm.response.json());",
+          "}"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,604 @@
+{
+  "info": {
+    "name": "Arduino Alert Monitor API",
+    "description": "API для мониторинга и управления тревогами Arduino Security System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alert_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "device_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🚨 Alert Monitor Dashboard",
+      "item": [
+        {
+          "name": "Get All Alerts (Monitor View)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const alerts = pm.response.json();",
+                  "    console.log(`Found ${alerts.length} alerts`);",
+                  "    if (alerts.length > 0) {",
+                  "        pm.collectionVariables.set('alert_id', alerts[0].id);",
+                  "        console.log('First alert ID saved:', alerts[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/monitor/alerts/",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "alerts", ""],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Количество тревог",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Получить все тревоги с расширенной информацией для мониторинга"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Unacknowledged Alerts Only",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitor/alerts/?acknowledged=false&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "alerts", ""],
+              "query": [
+                {
+                  "key": "acknowledged",
+                  "value": "false"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Получить только необработанные тревоги"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Alerts by Type - Motion",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitor/alerts/?type=motion",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "alerts", ""],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "motion"
+                }
+              ]
+            },
+            "description": "Фильтр по типу тревоги - обнаружение движения"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Alerts by Type - Panic",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitor/alerts/?type=panic",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "alerts", ""],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "panic"
+                }
+              ]
+            },
+            "description": "Фильтр по типу тревоги - паническая кнопка"
+          },
+          "response": []
+        },
+        {
+          "name": "Filter Alerts by Device",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitor/alerts/?device_id={{device_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "alerts", ""],
+              "query": [
+                {
+                  "key": "device_id",
+                  "value": "{{device_id}}"
+                }
+              ]
+            },
+            "description": "Фильтр тревог по конкретному устройству"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Statistics & Analytics",
+      "item": [
+        {
+          "name": "Get Alert Statistics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitor/stats/",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "stats", ""]
+            },
+            "description": "Получить общую статистику по тревогам"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Devices List",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const devices = pm.response.json();",
+                  "    console.log(`Found ${devices.length} active devices`);",
+                  "    if (devices.length > 0) {",
+                  "        pm.collectionVariables.set('device_id', devices[0].id);",
+                  "        console.log('First device ID saved:', devices[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitor/devices/",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "devices", ""]
+            },
+            "description": "Получить список активных Arduino устройств с их статусом"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔍 Alert Details & Management",
+      "item": [
+        {
+          "name": "Get Alert Details",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitor/alerts/{{alert_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "alerts", "{{alert_id}}", ""]
+            },
+            "description": "Получить детальную информацию о конкретной тревоге"
+          },
+          "response": []
+        },
+        {
+          "name": "Acknowledge Single Alert",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_acknowledged\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/monitor/alerts/{{alert_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "alerts", "{{alert_id}}", ""]
+            },
+            "description": "Подтвердить обработку конкретной тревоги"
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Acknowledge Alerts",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alert_ids\": [1, 2, 3, 4, 5]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/monitor/alerts/acknowledge/",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "alerts", "acknowledge", ""]
+            },
+            "description": "Массовое подтверждение нескольких тревог одновременно"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🎯 Real-time Monitoring Scenarios",
+      "item": [
+        {
+          "name": "Dashboard Refresh (All Data)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Комплексная проверка для дашборда",
+                  "const stats = pm.sendRequest({",
+                  "    url: pm.collectionVariables.get('base_url') + '/monitor/stats/',",
+                  "    method: 'GET',",
+                  "    header: {",
+                  "        'Authorization': 'Bearer ' + pm.collectionVariables.get('access_token')",
+                  "    }",
+                  "}, function (err, response) {",
+                  "    if (response.code === 200) {",
+                  "        const stats = response.json();",
+                  "        console.log('=== DASHBOARD STATS ===');",
+                  "        console.log('Total alerts:', stats.total_alerts);",
+                  "        console.log('Unacknowledged:', stats.unacknowledged_alerts);",
+                  "        console.log('Alerts today:', stats.alerts_today);",
+                  "        console.log('Most active device:', stats.most_active_device);",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitor/alerts/?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "alerts", ""],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Обновление данных для дашборда мониторинга"
+          },
+          "response": []
+        },
+        {
+          "name": "Emergency Response Check",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitor/alerts/?type=panic&acknowledged=false",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "alerts", ""],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "panic"
+                },
+                {
+                  "key": "acknowledged",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Проверка необработанных экстренных сигналов (паника)"
+          },
+          "response": []
+        },
+        {
+          "name": "Security Breach Check",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{access_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/monitor/alerts/?type=glass&acknowledged=false",
+              "host": ["{{base_url}}"],
+              "path": ["monitor", "alerts", ""],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "glass"
+                },
+                {
+                  "key": "acknowledged",
+                  "value": "false"
+                }
+              ]
+            },
+            "description": "Проверка необработанных сигналов взлома (разбитие стекла)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🧪 Test Data Generation",
+      "item": [
+        {
+          "name": "Generate Test Alert - Motion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{device_token}}\",\n  \"pir_motion\": true,\n  \"glass_break\": false,\n  \"door_open\": false,\n  \"panic_button\": false,\n  \"temperature\": 22.5,\n  \"humidity\": 68.3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/data/",
+              "host": ["{{base_url}}"],
+              "path": ["sensor", "data", ""]
+            },
+            "description": "Создать тестовую тревогу для проверки мониторинга"
+          },
+          "response": []
+        },
+        {
+          "name": "Generate Test Alert - Panic Emergency",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{device_token}}\",\n  \"pir_motion\": false,\n  \"glass_break\": false,\n  \"door_open\": false,\n  \"panic_button\": true,\n  \"temperature\": 23.1,\n  \"humidity\": 65.7\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/data/",
+              "host": ["{{base_url}}"],
+              "path": ["sensor", "data", ""]
+            },
+            "description": "Создать экстренную тревогу для тестирования"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Автоматическая проверка токена",
+          "if (pm.request.url.toString().includes('/token/') === false) {",
+          "    const accessToken = pm.collectionVariables.get('access_token');",
+          "    if (!accessToken) {",
+          "        console.log('⚠️ No access token found. Please login first.');",
+          "    }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Глобальная обработка ответов",
+          "if (pm.response.code >= 400) {",
+          "    console.log('❌ Error Response:', pm.response.json());",
+          "} else if (pm.response.code >= 200 && pm.response.code < 300) {",
+          "    console.log('✅ Request successful');",
+          "}"
+        ]
+      }
+    }
+  ]
+}
