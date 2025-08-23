@@ -11,4 +11,5 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('', include('security.urls')),
     path('sensor/', include('sensor.urls')), 
+    path('alert_monitor/', include('alert_monitor.urls')),
 ]

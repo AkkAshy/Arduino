@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from sensor.models import Alert, SensorData
 from security.models import ArduinoDevice, CustomUser
 from .serializers import AlertMonitorSerializer, AlertStatsSerializer
+from notifications.utils import send_stats_update
 
 class AlertMonitorListView(APIView):
     """Получение всех тревог для мониторинга"""
@@ -91,7 +92,7 @@ class AlertStatsView(APIView):
         return Response(serializer.data)
 
 class BulkAcknowledgeAlertsView(APIView):
-    """Массовое подтверждение тревог"""
+    """Массовое подтверждение тревог с WebSocket уведомлениями"""
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
@@ -103,16 +104,21 @@ class BulkAcknowledgeAlertsView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Обновляем статус тревог
         updated_count = Alert.objects.filter(
             id__in=alert_ids
         ).update(is_acknowledged=True)
         
+        # 🔔 WebSocket уведомления
+        if updated_count > 0:
+            from notifications.utils import send_bulk_acknowledge_notification
+            send_bulk_acknowledge_notification(alert_ids, request.user.username)
+            send_stats_update()
+        
         return Response({
             'message': f'{updated_count} alerts acknowledged',
-            'acknowledged_count': updated_count
+            'acknowledged_count': updated_count,
+            'acknowledged_by': request.user.username
         })
-
 class AlertDetailView(APIView):
     """Детальная информация о конкретной тревоге"""
     permission_classes = [IsAuthenticated]

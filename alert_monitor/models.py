@@ -1,3 +1,5 @@
+from django.db import models
+
 class MonitorSession(models.Model):
     session_id = models.CharField(max_length=64, unique=True)
     started_at = models.DateTimeField(auto_now_add=True)

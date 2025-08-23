@@ -30,6 +30,8 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'security.CustomUser'
 
+ASGI_APPLICATION = 'server_arduino.asgi.application'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'security',
     'sensor',
+    'alert_monitor',
 ]
 
 MIDDLEWARE = [

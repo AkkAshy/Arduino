@@ -6,15 +6,16 @@ from .models import SensorData, Alert, SensorBuffer
 from .serializers import SensorDataSerializer, AlertSerializer
 from .services import SensorDataProcessor
 from security.models import ArduinoDevice
+from notifications.utils import send_user_alert_notification, send_device_status_update, send_stats_update
+from django.utils import timezone
 import logging
 
 logger = logging.getLogger(__name__)
 
 class SensorDataView(APIView):
-    """Обновленный view для приема данных с датчиков с умной логикой"""
+    """Обновленный view с WebSocket уведомлениями"""
     
     def post(self, request):
-        # Базовая валидация данных
         token = request.data.get('token')
         if not token:
             return Response(
@@ -22,7 +23,6 @@ class SensorDataView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Поиск устройства
         try:
             device = ArduinoDevice.objects.get(token=token, is_active=True)
         except ArduinoDevice.DoesNotExist:
@@ -31,7 +31,6 @@ class SensorDataView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED
             )
         
-        # Подготавливаем данные датчиков
         sensor_data_dict = {
             'pir_motion': request.data.get('pir_motion', False),
             'glass_break': request.data.get('glass_break', False),
@@ -41,13 +40,27 @@ class SensorDataView(APIView):
             'humidity': request.data.get('humidity'),
         }
         
-        # 🧠 Применяем умную логику обработки
         try:
             processing_result = SensorDataProcessor.process_sensor_data(device, sensor_data_dict)
             
+            # 🔔 WebSocket уведомления!
+            if processing_result['alerts_created']:
+                # Отправляем уведомления для каждой созданной тревоги
+                for alert_id in processing_result['alerts_created']:
+                    send_user_alert_notification(alert_id)
+                
+                # Обновляем статистику в админ панели
+                send_stats_update()
+            
+            # Отправляем обновление статуса устройства
+            send_device_status_update(
+                device.id, 
+                'online', 
+                timezone.now()
+            )
+            
             logger.info(
-                f"Device {device.name} data processed: {processing_result['status']}, "
-                f"alerts: {len(processing_result['alerts_created'])}"
+                f"Device {device.name} processed with {len(processing_result['alerts_created'])} alerts"
             )
             
             return Response({
@@ -56,6 +69,7 @@ class SensorDataView(APIView):
                 "processing_status": processing_result['status'],
                 "message": processing_result['message'],
                 "alerts_created": processing_result['alerts_created'],
+                "notifications_sent": len(processing_result['alerts_created']) > 0,
                 "work_time_active": device.is_work_time_now(),
                 "multi_sensor_mode": device.multi_sensor_required
             }, status=status.HTTP_201_CREATED)
@@ -65,6 +79,36 @@ class SensorDataView(APIView):
             return Response(
                 {'error': 'Internal processing error'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class AcknowledgeAlertView(APIView):
+    """Подтверждение оповещения с WebSocket уведомлением"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, alert_id):
+        try:
+            alert = Alert.objects.get(id=alert_id, owner_id=request.user.id)
+            alert.is_acknowledged = True
+            alert.save()
+            
+            # 🔔 WebSocket уведомление об изменении статуса
+            from notifications.utils import send_alert_status_update
+            send_alert_status_update(alert_id, 'acknowledged', request.user.username)
+            
+            # Обновляем статистику
+            send_stats_update()
+            
+            return Response({
+                "status": "alert acknowledged",
+                "alert_id": alert_id,
+                "alert_type": alert.alert_type,
+                "sensors_count": alert.sensors_count,
+                "acknowledged_by": request.user.username
+            })
+        except Alert.DoesNotExist:
+            return Response(
+                {"error": "Alert not found"}, 
+                status=status.HTTP_404_NOT_FOUND
             )
 
 class AlertListView(APIView):
