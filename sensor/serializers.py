@@ -80,5 +80,5 @@ class SensorBufferSerializer(serializers.ModelSerializer):
         model = SensorBuffer
         fields = [
             'id', 'timestamp', 'pir_motion', 'glass_break', 'door_open', 
-            'panic_button', 'temperature', 'humidity', 'is_processed', 'created_alert'
+            'panic_button', 'is_processed', 'created_alert'
         ]

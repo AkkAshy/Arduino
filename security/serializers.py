@@ -22,6 +22,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def to_representation(self, instance):
+        return {
+            "id": instance.id,
+            "username": instance.username,
+            "full_name": instance.full_name,
+            "phone_number": instance.phone_number,
+        }
+
 # 🔐 Авторизация пользователя (если нужно отдельно)
 class UserAuthSerializer(serializers.Serializer):
     username = serializers.CharField()

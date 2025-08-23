@@ -1,726 +1,809 @@
 {
-	"info": {
-		"_postman_id": "12345678-1234-1234-1234-123456789012",
-		"name": "Arduino Security System API",
-		"description": "Complete API collection for Arduino Security System",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "🔐 Authentication",
-			"item": [
-				{
-					"name": "User Registration",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": \"testuser\",\n    \"full_name\": \"Test User\",\n    \"phone_number\": \"+998901234567\",\n    \"password\": \"securepassword123\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/register/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"register",
-								""
-							]
-						}
-					}
-				},
-				{
-					"name": "Get JWT Token",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"if (pm.response.code === 200) {",
-									"    const response = pm.response.json();",
-									"    pm.collectionVariables.set('jwt_token', response.access);",
-									"    pm.collectionVariables.set('refresh_token', response.refresh);",
-									"    console.log('JWT Token saved');",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"securepassword123\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/token/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"token",
-								""
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "🌐 Web Dashboard (Admin)",
-			"item": [
-				{
-					"name": "📊 Alert Monitoring",
-					"item": [
-						{
-							"name": "Get All Alerts",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/alert_monitor/alerts/?limit=50&acknowledged=false",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"alert_monitor",
-										"alerts",
-										""
-									],
-									"query": [
-										{
-											"key": "limit",
-											"value": "50"
-										},
-										{
-											"key": "acknowledged",
-											"value": "false"
-										}
-									]
-								}
-							}
-						},
-						{
-							"name": "Bulk Acknowledge Alerts",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"alert_ids\": [1, 2, 3, 4]\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/alert_monitor/alerts/acknowledge/",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"alert_monitor",
-										"alerts",
-										"acknowledge",
-										""
-									]
-								}
-							}
-						},
-						{
-							"name": "Get Alert Statistics",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/alert_monitor/stats/",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"alert_monitor",
-										"stats",
-										""
-									]
-								}
-							}
-						},
-						{
-							"name": "Get Active Devices",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/alert_monitor/devices/",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"alert_monitor",
-										"devices",
-										""
-									]
-								}
-							}
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "📱 Mobile App (User)",
-			"item": [
-				{
-					"name": "🔌 Device Management",
-					"item": [
-						{
-							"name": "Create Arduino Device",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"if (pm.response.code === 201) {",
-											"    const response = pm.response.json();",
-											"    pm.collectionVariables.set('arduino_token', response.token);",
-											"    console.log('Arduino Token saved:', response.token);",
-											"}"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{}"
-								},
-								"url": {
-									"raw": "{{base_url}}/arduino/create/",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"arduino",
-										"create",
-										""
-									]
-								}
-							}
-						},
-						{
-							"name": "List My Devices",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/arduino/list/",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"arduino",
-										"list",
-										""
-									]
-								}
-							}
-						},
-						{
-							"name": "Update Device Info",
-							"request": {
-								"method": "PATCH",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"name\": \"Living Room Security\",\n    \"address\": \"Tashkent, Chilanzar 12-40-15\",\n    \"is_active\": true\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/arduino/1/update/",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"arduino",
-										"1",
-										"update",
-										""
-									]
-								}
-							}
-						}
-					]
-				},
-				{
-					"name": "⚙️ Device Settings",
-					"item": [
-						{
-							"name": "Get Device Settings",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/sensor/device/1/settings/",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"sensor",
-										"device",
-										"1",
-										"settings",
-										""
-									]
-								}
-							}
-						},
-						{
-							"name": "Update Work Schedule",
-							"request": {
-								"method": "PATCH",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"work_schedule_enabled\": true,\n    \"work_start_time\": \"21:00\",\n    \"work_end_time\": \"09:00\",\n    \"multi_sensor_required\": true,\n    \"sensor_count_threshold\": 2,\n    \"time_window_seconds\": 60\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/sensor/device/1/settings/",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"sensor",
-										"device",
-										"1",
-										"settings",
-										""
-									]
-								}
-							}
-						},
-						{
-							"name": "Get Device Status",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/sensor/device/1/status/",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"sensor",
-										"device",
-										"1",
-										"status",
-										""
-									]
-								}
-							}
-						}
-					]
-				},
-				{
-					"name": "🚨 My Alerts",
-					"item": [
-						{
-							"name": "Get My Alerts",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									}
-								],
-								"url": {
-									"raw": "{{base_url}}/sensor/alerts/?acknowledged=false",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"sensor",
-										"alerts",
-										""
-									],
-									"query": [
-										{
-											"key": "acknowledged",
-											"value": "false"
-										}
-									]
-								}
-							}
-						},
-						{
-							"name": "Acknowledge Alert",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Authorization",
-										"value": "Bearer {{jwt_token}}"
-									},
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{}"
-								},
-								"url": {
-									"raw": "{{base_url}}/sensor/alerts/1/acknowledge/",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"sensor",
-										"alerts",
-										"1",
-										"acknowledge",
-										""
-									]
-								}
-							}
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "🤖 Arduino Hardware",
-			"item": [
-				{
-					"name": "Arduino Authorization Check",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{arduino_token}}\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/arduino/auth/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"arduino",
-								"auth",
-								""
-							]
-						}
-					}
-				},
-				{
-					"name": "Send Normal Sensor Data",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{arduino_token}}\",\n    \"pir_motion\": false,\n    \"glass_break\": false,\n    \"door_open\": false,\n    \"panic_button\": false,\n    \"temperature\": 23.5,\n    \"humidity\": 65.2\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/sensor/data/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"sensor",
-								"data",
-								""
-							]
-						}
-					}
-				},
-				{
-					"name": "Send Motion Alert",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{arduino_token}}\",\n    \"pir_motion\": true,\n    \"glass_break\": false,\n    \"door_open\": false,\n    \"panic_button\": false,\n    \"temperature\": 24.1,\n    \"humidity\": 66.8\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/sensor/data/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"sensor",
-								"data",
-								""
-							]
-						}
-					}
-				},
-				{
-					"name": "Send Glass Break Alert",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{arduino_token}}\",\n    \"pir_motion\": false,\n    \"glass_break\": true,\n    \"door_open\": false,\n    \"panic_button\": false,\n    \"temperature\": 23.8,\n    \"humidity\": 65.5\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/sensor/data/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"sensor",
-								"data",
-								""
-							]
-						}
-					}
-				},
-				{
-					"name": "Send Panic Button",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{arduino_token}}\",\n    \"pir_motion\": false,\n    \"glass_break\": false,\n    \"door_open\": false,\n    \"panic_button\": true,\n    \"temperature\": 25.0,\n    \"humidity\": 68.0\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/sensor/data/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"sensor",
-								"data",
-								""
-							]
-						}
-					}
-				},
-				{
-					"name": "Send Multi-Sensor Alert",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{arduino_token}}\",\n    \"pir_motion\": true,\n    \"glass_break\": true,\n    \"door_open\": false,\n    \"panic_button\": false,\n    \"temperature\": 24.5,\n    \"humidity\": 67.2\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/sensor/data/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"sensor",
-								"data",
-								""
-							]
-						}
-					}
-				}
-			]
-		},
-		{
-			"name": "🧪 Testing Tools",
-			"item": [
-				{
-					"name": "Test Single Sensor",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{arduino_token}}\",\n    \"scenario\": \"single\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/sensor/test/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"sensor",
-								"test",
-								""
-							]
-						}
-					}
-				},
-				{
-					"name": "Test Multi Sensor",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"token\": \"{{arduino_token}}\",\n    \"scenario\": \"multi\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/sensor/test/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"sensor",
-								"test",
-								""
-							]
-						}
-					}
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:8000",
-			"type": "string"
-		},
-		{
-			"key": "jwt_token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "refresh_token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "arduino_token",
-			"value": "",
-			"type": "string"
-		}
-	]
+  "info": {
+    "name": "Arduino Security System API",
+    "description": "Полная документация API для системы безопасности с WebSocket поддержкой",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔐 АУТЕНТИФИКАЦИЯ",
+      "item": [
+        {
+          "name": "1. Регистрация пользователя",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"test_user\",\n  \"full_name\": \"Иван Иванов\",\n  \"phone_number\": \"+998901234567\",\n  \"password\": \"securePassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/register/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "register",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Получение JWT токена",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('jwt_token', response.access);",
+                  "    console.log('JWT Token сохранен:', response.access);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"test_user\",\n  \"password\": \"securePassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/token/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "token",
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔌 УПРАВЛЕНИЕ ARDUINO",
+      "item": [
+        {
+          "name": "1. Создание нового Arduino устройства",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('arduino_token', response.token);",
+                  "    console.log('Arduino Token сохранен:', response.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/arduino/create/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "arduino",
+                "create",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Привязка Arduino к аккаунту",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('device_id', response.device_id);",
+                  "    console.log('Device ID сохранен:', response.device_id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{arduino_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/arduino/claim/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "arduino",
+                "claim",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Список моих Arduino устройств",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/arduino/list/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "arduino",
+                "list",
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚙️ ANDROID APP - Управление устройством",
+      "item": [
+        {
+          "name": "1. Получить настройки устройства",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sensor/device/{{device_id}}/settings/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "device",
+                "{{device_id}}",
+                "settings",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. ВКЛ/ВЫКЛ устройство (кнопка в приложении)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"work_schedule_enabled\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/device/{{device_id}}/settings/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "device",
+                "{{device_id}}",
+                "settings",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Установить время работы",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"work_schedule_enabled\": true,\n  \"work_start_time\": \"22:00\",\n  \"work_end_time\": \"08:00\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/device/{{device_id}}/settings/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "device",
+                "{{device_id}}",
+                "settings",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Статус устройства в реальном времени",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sensor/device/{{device_id}}/status/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "device",
+                "{{device_id}}",
+                "status",
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📱 МОБИЛЬНОЕ ПРИЛОЖЕНИЕ - Уведомления",
+      "item": [
+        {
+          "name": "1. Получить мои уведомления",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sensor/alerts/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "alerts",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Только непрочитанные уведомления",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sensor/alerts/?acknowledged=false",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "alerts",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "acknowledged",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Фильтр по типу и приоритету",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/sensor/alerts/?type=panic&confidence=high",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "alerts",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "panic"
+                },
+                {
+                  "key": "confidence",
+                  "value": "high"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Подтвердить прочтение уведомления",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/alerts/15/acknowledge/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "alerts",
+                "15",
+                "acknowledge",
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🖥️ ВЕБ АДМИНКА - Мониторинг всех устройств",
+      "item": [
+        {
+          "name": "1. Все уведомления системы",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alert_monitor/alerts/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alert_monitor",
+                "alerts",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Фильтр по устройству",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alert_monitor/alerts/?device_id={{device_id}}&limit=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alert_monitor",
+                "alerts",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "device_id",
+                  "value": "{{device_id}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. Статистика системы",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alert_monitor/stats/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alert_monitor",
+                "stats",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Все устройства с адресами и пользователями",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/alert_monitor/devices/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alert_monitor",
+                "devices",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. Массовое подтверждение уведомлений",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alert_ids\": [15, 16, 17, 18]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/alert_monitor/alerts/acknowledge/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "alert_monitor",
+                "alerts",
+                "acknowledge",
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🤖 ARDUINO - Отправка данных с датчиков",
+      "item": [
+        {
+          "name": "1. Авторизация Arduino",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{arduino_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/arduino/auth/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "arduino",
+                "auth",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Обычные данные с датчиков",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{arduino_token}}\",\n  \"pir_motion\": true,\n  \"glass_break\": false,\n  \"door_open\": false,\n  \"panic_button\": false,\n  \"temperature\": 23.5,\n  \"humidity\": 65.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/data/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "data",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "3. ПАНИЧЕСКАЯ КНОПКА (высший приоритет)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{arduino_token}}\",\n  \"pir_motion\": false,\n  \"glass_break\": false,\n  \"door_open\": false,\n  \"panic_button\": true,\n  \"temperature\": 24.1,\n  \"humidity\": 68.2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/data/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "data",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "4. Множественные датчики",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{arduino_token}}\",\n  \"pir_motion\": true,\n  \"glass_break\": true,\n  \"door_open\": true,\n  \"panic_button\": false,\n  \"temperature\": 25.0,\n  \"humidity\": 70.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/data/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "data",
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 ТЕСТИРОВАНИЕ",
+      "item": [
+        {
+          "name": "1. Тест одного датчика",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{arduino_token}}\",\n  \"scenario\": \"single\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/test/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "test",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "2. Тест паники",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{arduino_token}}\",\n  \"scenario\": \"panic\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sensor/test/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "sensor",
+                "test",
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "ws_url", 
+      "value": "ws://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "arduino_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "device_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Автоматическая установка базового URL если не установлен",
+          "if (!pm.environment.get('base_url')) {",
+          "    pm.environment.set('base_url', 'http://localhost:8000');",
+          "}",
+          "if (!pm.environment.get('ws_url')) {",
+          "    pm.environment.set('ws_url', 'ws://localhost:8000');",
+          "}"
+        ]
+      }
+    }
+  ]
 }

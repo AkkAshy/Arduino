@@ -59,8 +59,6 @@ class SensorBuffer(models.Model):
     door_open = models.BooleanField(default=False)
     panic_button = models.BooleanField(default=False)
     
-    temperature = models.FloatField(null=True, blank=True)
-    humidity = models.FloatField(null=True, blank=True)
     
     # Статус обработки
     is_processed = models.BooleanField(default=False)

@@ -1,9 +1,19 @@
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserRegistrationSerializer
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 
 class UserRegistrationView(APIView):
+    permission_classes = [AllowAny]
+
+
+    @method_decorator(csrf_exempt)  # 🔑 отключаем CSRF
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+    
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
@@ -24,7 +34,7 @@ class ArduinoCreateView(APIView):
     def post(self, request):
         serializer = ArduinoDeviceTokenSerializer(data={}, context={'request': request})
         if serializer.is_valid():
-            device = serializer.save(user=request.user)
+            device = serializer.save()
             return Response({'token': device.token}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

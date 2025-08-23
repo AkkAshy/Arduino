@@ -138,27 +138,7 @@ class AlertListView(APIView):
         serializer = AlertSerializer(user_alerts, many=True)
         return Response(serializer.data)
 
-class AcknowledgeAlertView(APIView):
-    """Подтверждение оповещения"""
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, request, alert_id):
-        try:
-            alert = Alert.objects.get(id=alert_id, owner_id=request.user.id)
-            alert.is_acknowledged = True
-            alert.save()
-            
-            return Response({
-                "status": "alert acknowledged",
-                "alert_id": alert_id,
-                "alert_type": alert.alert_type,
-                "sensors_count": alert.sensors_count
-            })
-        except Alert.DoesNotExist:
-            return Response(
-                {"error": "Alert not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+
 
 class DeviceSettingsView(APIView):
     """Управление настройками устройства"""
