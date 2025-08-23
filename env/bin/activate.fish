@@ -33,7 +33,7 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV /data/data/com.termux/files/home/pp/server_arduino/env
+set -gx VIRTUAL_ENV /home/kanat/Codes/py_project/Arduino/env
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"bin $PATH
