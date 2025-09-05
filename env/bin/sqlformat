@@ -1,4 +1,4 @@
-#!/home/kanat/Codes/py_project/Arduino/env/bin/python3
+#!/home/agro/server_arduino/env/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys

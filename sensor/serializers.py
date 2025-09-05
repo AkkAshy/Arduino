@@ -4,13 +4,13 @@ from security.models import ArduinoDevice
 
 class SensorDataSerializer(serializers.ModelSerializer):
     token = serializers.CharField(write_only=True)
-    
+
     class Meta:
         model = SensorData
         fields = [
-            'token', 'pir_motion', 'glass_break', 'door_open', 'panic_button', 
-            'temperature', 'humidity', 'triggered_sensors_count', 'is_valid_alert', 
-            'work_time_status'
+            'token', 'pir_motion', 'glass_break', 'door_open', 'panic_button',
+            'triggered_sensors_count', 'is_valid_alert', 'work_time_status'
+            # Убрали 'temperature', 'humidity'
         ]
         read_only_fields = ['triggered_sensors_count', 'is_valid_alert', 'work_time_status']
 
@@ -18,7 +18,7 @@ class AlertSerializer(serializers.ModelSerializer):
     """Расширенный сериализатор для тревог"""
     triggered_sensors_display = serializers.SerializerMethodField()
     time_elapsed = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Alert
         fields = [
@@ -29,7 +29,7 @@ class AlertSerializer(serializers.ModelSerializer):
             'triggered_sensors_display', 'time_elapsed'
         ]
         read_only_fields = ['id', 'timestamp']
-    
+
     def get_triggered_sensors_display(self, obj):
         """Человекочитаемые названия датчиков"""
         sensor_names = {
@@ -39,13 +39,13 @@ class AlertSerializer(serializers.ModelSerializer):
             'panic_button': '🚨 Паническая кнопка'
         }
         return [sensor_names.get(sensor, sensor) for sensor in obj.triggered_sensors]
-    
+
     def get_time_elapsed(self, obj):
         """Время с момента создания тревоги"""
         from django.utils import timezone
-        
+
         elapsed = timezone.now() - obj.timestamp
-        
+
         if elapsed.days > 0:
             return f"{elapsed.days} дн. назад"
         elif elapsed.seconds > 3600:
@@ -62,7 +62,7 @@ class DeviceSettingsSerializer(serializers.ModelSerializer):
     work_start_time = serializers.TimeField(format='%H:%M')
     work_end_time = serializers.TimeField(format='%H:%M')
     current_work_status = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = ArduinoDevice
         fields = [
@@ -70,7 +70,7 @@ class DeviceSettingsSerializer(serializers.ModelSerializer):
             'multi_sensor_required', 'sensor_count_threshold', 'time_window_seconds',
             'timezone_name', 'current_work_status'
         ]
-    
+
     def get_current_work_status(self, obj):
         return obj.is_work_time_now()
 
@@ -79,6 +79,6 @@ class SensorBufferSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorBuffer
         fields = [
-            'id', 'timestamp', 'pir_motion', 'glass_break', 'door_open', 
+            'id', 'timestamp', 'pir_motion', 'glass_break', 'door_open',
             'panic_button', 'is_processed', 'created_alert'
         ]
