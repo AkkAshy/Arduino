@@ -1,3 +1,5 @@
+# sensor/serializers.py - Исправленная версия с полной информацией о датчиках
+
 from rest_framework import serializers
 from .models import SensorData, Alert, SensorBuffer
 from security.models import ArduinoDevice
@@ -10,12 +12,12 @@ class SensorDataSerializer(serializers.ModelSerializer):
         fields = [
             'token', 'pir_motion', 'glass_break', 'door_open', 'panic_button',
             'triggered_sensors_count', 'is_valid_alert', 'work_time_status'
-            # Убрали 'temperature', 'humidity'
         ]
         read_only_fields = ['triggered_sensors_count', 'is_valid_alert', 'work_time_status']
 
 class AlertSerializer(serializers.ModelSerializer):
-    """Расширенный сериализатор для тревог"""
+    """Расширенный сериализатор для тревог с полной информацией о датчиках"""
+    sensor_states = serializers.SerializerMethodField()
     triggered_sensors_display = serializers.SerializerMethodField()
     time_elapsed = serializers.SerializerMethodField()
 
@@ -26,36 +28,77 @@ class AlertSerializer(serializers.ModelSerializer):
             'device_name', 'device_address',
             'owner_username', 'owner_full_name', 'owner_phone',
             'triggered_sensors', 'sensors_count', 'confidence_level',
-            'triggered_sensors_display', 'time_elapsed'
+            'sensor_states', 'triggered_sensors_display', 'time_elapsed'
         ]
         read_only_fields = ['id', 'timestamp']
 
+    def get_sensor_states(self, obj):
+        """Полная информация о состоянии всех датчиков (true/false)"""
+        # Если есть связанные данные датчиков, берем оттуда
+        if obj.sensor_data:
+            return {
+                'pir_motion': obj.sensor_data.pir_motion,
+                'glass_break': obj.sensor_data.glass_break,
+                'door_open': obj.sensor_data.door_open,
+                'panic_button': obj.sensor_data.panic_button
+            }
+
+        # Иначе восстанавливаем из triggered_sensors
+        all_sensors = {
+            'pir_motion': False,
+            'glass_break': False,
+            'door_open': False,
+            'panic_button': False
+        }
+
+        # Устанавливаем true для сработавших датчиков
+        for sensor in obj.triggered_sensors:
+            if sensor in all_sensors:
+                all_sensors[sensor] = True
+
+        return all_sensors
+
     def get_triggered_sensors_display(self, obj):
-        """Человекочитаемые названия датчиков"""
+        """Человекочитаемые названия только сработавших датчиков на узбекском"""
         sensor_names = {
-            'pir_motion': '🚶 Движение',
-            'glass_break': '🔨 Разбитие стекла',
-            'door_open': '🚪 Открытие двери',
-            'panic_button': '🚨 Паническая кнопка'
+            'pir_motion': '🚶 Harakat',
+            'glass_break': '🔨 Shisha sinishi',
+            'door_open': '🚪 Eshik ochilishi',
+            'panic_button': '🚨 Favqulodda tugma'
         }
         return [sensor_names.get(sensor, sensor) for sensor in obj.triggered_sensors]
 
     def get_time_elapsed(self, obj):
-        """Время с момента создания тревоги"""
+        """Точное время с момента создания тревоги"""
         from django.utils import timezone
 
-        elapsed = timezone.now() - obj.timestamp
+        now = timezone.now()
+        elapsed = now - obj.timestamp
 
-        if elapsed.days > 0:
-            return f"{elapsed.days} дн. назад"
-        elif elapsed.seconds > 3600:
-            hours = elapsed.seconds // 3600
-            return f"{hours} ч. назад"
-        elif elapsed.seconds > 60:
-            minutes = elapsed.seconds // 60
-            return f"{minutes} мин. назад"
-        else:
+        # Общее количество секунд с момента создания
+        total_seconds = int(elapsed.total_seconds())
+
+        if total_seconds < 0:
             return "только что"
+        elif total_seconds < 60:
+            return f"{total_seconds} сек. назад"
+        elif total_seconds < 3600:  # Меньше часа
+            minutes = total_seconds // 60
+            return f"{minutes} мин. назад"
+        elif total_seconds < 86400:  # Меньше дня
+            hours = total_seconds // 3600
+            remaining_minutes = (total_seconds % 3600) // 60
+            if remaining_minutes > 0:
+                return f"{hours} ч. {remaining_minutes} мин. назад"
+            else:
+                return f"{hours} ч. назад"
+        else:  # Больше дня
+            days = elapsed.days
+            hours = (total_seconds % 86400) // 3600
+            if hours > 0:
+                return f"{days} дн. {hours} ч. назад"
+            else:
+                return f"{days} дн. назад"
 
 class DeviceSettingsSerializer(serializers.ModelSerializer):
     """Сериализатор для настроек устройства"""
